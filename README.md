@@ -17,6 +17,16 @@ Telepresence drone, but in space!
 -----------------------------------------------------------------------------------------------------------------
 ~~~
 
+## TODO ##
+
+- Setup guide
+- Some kind of security
+- Two-way voice
+- Scheduling and access control
+- More logging and timestamps
+- PWM
+- Fix pin mapping on gpio library for board rev 2
+
 ## License ##
 
 LGPLv3
