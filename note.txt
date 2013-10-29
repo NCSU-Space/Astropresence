@@ -1,0 +1,5 @@
+Startup script is in /etc/rc.local
+Network settings go to /etc/network/interfaces
+
+push video from pi:
+ffmpeg -s 160x120 -f video4linux2 -i /dev/video0 -f mpeg1video -b 800k -r 20 http://192.168.0.101:8082/s3cret/160/120/

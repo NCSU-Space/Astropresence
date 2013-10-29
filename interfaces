@@ -1,0 +1,18 @@
+auto lo
+
+iface lo inet loopback
+iface eth0 inet static
+address 192.168.0.10
+netmask 255.255.255.0
+gateway 192.168.0.1
+
+auto wlan0
+allow-hotplug wlan0
+iface wlan0 inet static
+address 192.168.0.11
+netmask 255.255.255.0
+gateway 192.168.0.1
+wpa-ssid "S4IS8T47SYA8Q28A3RTS4"
+wpa-psk "s3d5ye754gdueog75e54"
+
+iface default inet dhcp
