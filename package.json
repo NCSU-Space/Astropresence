@@ -1,0 +1,10 @@
+{
+  "name": "Astropresence",
+  "description": "For controlling drones via browser",
+  "author": "Densaugeo",
+  "dependencies": {
+    "express": "3.4.x",
+    "ws": "0.4.x"
+  },
+  "engine": "node 0.10.x"
+}
