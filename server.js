@@ -1,22 +1,23 @@
-var express = require("express");
-var ws = require("ws");
-var readline = require("readline");
+var express = require('express');
+var ws = require('ws');
+var readline = require('readline');
 var http = require('http');
+var repl = require('repl');
 
 //////////////////////////////
 // HTTP server for web page //
 //////////////////////////////
 
-var FILE_PORT = 8080;
+FILE_PORT = 8080;
 var app = express();
 var httpServer = http.createServer(app);
 
 // Simple static page server
 app.use(express.compress());
-app.use(express.static("./http"));
+app.use(express.static('./http'));
 httpServer.listen(FILE_PORT);
 
-console.log((new Date()) + ": Static file server listening at http://[all hosts]:" + FILE_PORT + "/");
+console.log((new Date()) + ': Static file server listening at http://[all hosts]:' + FILE_PORT + '/');
 
 ///////////////////////////
 // Repeater for controls //
@@ -107,22 +108,18 @@ var streamServer = require('http').createServer( function(request, response) {
   }
 }).listen(STREAM_PORT);
 
-console.log('Listening for MPEG Stream on http://127.0.0.1:'+STREAM_PORT+'/<secret>/<width>/<height>');
-console.log('Awaiting WebSocket connections on ws://127.0.0.1:'+WEBSOCKET_PORT+'/');
+console.log('Listening for MPEG Stream on http://127.0.0.1:' + STREAM_PORT + '/<secret>/<width>/<height>');
+console.log('Awaiting WebSocket connections on ws://127.0.0.1:' + WEBSOCKET_PORT + '/');
 
 /////////
 // CLI //
 /////////
 
-try {
-  var CLILink = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-  
-  CLILink.on("line", function(message) {
-    try {console.log(eval(message));}
-    catch(error) {console.log(error);}
-  });
-}
-catch(error) {/* When we fail, we just give up, dying in the depths of an interpreter, not even crying out an error */}
+var cli = repl.start({});
+cli.context.app = app;
+cli.context.httpServer = httpServer;
+cli.context.controlSocketToThePI = controlSocketToThePI;
+cli.context.connectionToPi = connectionToPi;
+cli.context.controlSocketServer = controlSocketServer;
+cli.context.clients = clients;
+cli.context.socketServer = socketServer;

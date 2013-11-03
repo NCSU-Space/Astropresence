@@ -1,5 +1,6 @@
 var ws = require('ws');
 var gpio = require('pi-gpio');
+var repl = require('repl');
 
 // Open connection to server - how to not hard-code this?
 controlSocket = new ws('ws://192.168.0.101/controlDrone/');
@@ -12,11 +13,11 @@ controlSocket.on('open', function() {
 function openPin(pinNumber) {
   gpio.open(pinNumber, 'output', function(error) {
     if(error) {
-      console.log("Error while trying to open pin " + pinNumber + ": " + error);
-      console.log("Trying again in 10s...");
+      console.log('Error while trying to open pin ' + pinNumber + ': ' + error);
+      console.log('Trying again in 10s...');
       setTimeout(openPin, 10000, pinNumber);
     }
-    else {console.log("Pin " + pinNumber + " opened with no errors")}
+    else {console.log('Pin ' + pinNumber + ' opened with no errors')}
   });
 }
 openPin( 7);
@@ -41,3 +42,10 @@ controlSocket.on('message', function(message) {
     gpio.write(15, rover.motorLeft > 0);
   }
 });
+
+/////////
+// CLI //
+/////////
+
+var cli = repl.start({});
+cli.context.controlSocket = controlSocket;
