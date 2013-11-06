@@ -104,18 +104,6 @@ To set autoconnecting on the Pi, place the commands to start nodejs and ffmpeg i
 -----------------------------------------------------------------------------------------------------------------
 ~~~
 
-## TODO ##
-
-- Setup guide
-- Some kind of security
-- Two-way voice
-- Scheduling and access control
-- More logging and timestamps
-- PWM
-- Fix pin mapping on gpio library for board rev 2
-- Move hard-coded IPs into CLI args
-- Move this list to a wiki
-
 ## License ##
 
 LGPLv3
