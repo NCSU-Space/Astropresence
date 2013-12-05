@@ -4,6 +4,8 @@ var readline = require('readline');
 var http = require('http');
 var repl = require('repl');
 
+process.title = 'tele_intermediary_server';
+
 //////////////////////////////
 // HTTP server for web page //
 //////////////////////////////
