@@ -2,6 +2,8 @@ var ws = require('ws');
 var gpio = require('pi-gpio');
 var repl = require('repl');
 
+process.title = 'tele_client_on_drone';
+
 // Open connection to server - how to not hard-code this?
 controlSocket = new ws('ws://192.168.0.101/controlDrone/');
 
