@@ -4,49 +4,55 @@ var readline = require('readline');
 var http = require('http');
 var repl = require('repl');
 
-process.title = 'tele_intermediary_server';
+process.title = 'tele_server';
 
 //////////////////////////////
 // HTTP server for web page //
 //////////////////////////////
 
-FILE_PORT = 8080;
+var FILE_PORT = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+var IP = process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
 var app = express();
-var httpServer = http.createServer(app);
+var httpForStatics = http.createServer(app);
+//var httpForWS = http.createServer();
+//httpForWS.listen(8000, IP);
+
 
 // Simple static page server
+app.use('/http', express.static('./http'));
 app.use(express.compress());
-app.use(express.static('./http'));
-httpServer.listen(FILE_PORT);
+httpForStatics.listen(FILE_PORT, IP);
 
-console.log((new Date()) + ': Static file server listening at http://[all hosts]:' + FILE_PORT + '/');
+console.log((new Date()) + ': Static file server listening at http://' + IP + ':' + FILE_PORT + '/');
 
 ///////////////////////////
 // Repeater for controls //
 ///////////////////////////
 
 // These link to rover side
-var controlSocketToThePI = new (ws.Server)({server: httpServer, path: '/controlDrone/'});
-var connectionToPi;
+var controlSocketToThePI = new (ws.Server)({server: httpForStatics, path: '/controlDrone'});
 
 controlSocketToThePI.on('connection', function(connection) {
-  connectionToPi = connection;
   console.log('Received connection from Pi');
 });
 
 // And these link to client(s)
-var controlSocketServer = new (ws.Server)({server: httpServer, path: '/controlClient/'});
+var controlSocketServer = new (ws.Server)({server: httpForStatics, path: '/controlClient'});
 
 controlSocketServer.on('connection', function(connection) {
+  console.log((new Date()) + ': Received WebSocket at :8000/controlClient');
+  
   connection.on('message', function(message) {
-    console.log('received this: ' + message);
-    
     try {
-      connectionToPi.send(message);
+      controlSocketToThePI.clients[0].send(message);
     }
     catch(error) {
       console.log(error);
     }
+  });
+  
+  connection.on('close', function() {
+    console.log((new Date()) + ': Closed WebSocket at :8000/controlClient');
   });
 });
 
@@ -55,7 +61,7 @@ controlSocketServer.on('connection', function(connection) {
 ////////////////////////////////////
 
 var STREAM_PORT = 8082,
-    STREAM_SECRET = 's3cret', // CHANGE THIS!
+    STREAM_SECRET = '/videoDrone', // CHANGE THIS!
     WEBSOCKET_PORT = 8080,
     STREAM_MAGIC_BYTES = 'jsmp'; // Must be 4 bytes
 
@@ -64,10 +70,10 @@ var width = 320,
     height = 240;
 
 // Websocket Server
-var socketServer = new (ws.Server)({server: httpServer, path: '/videoClient/'});
+var socketServer = new (ws.Server)({server: httpForStatics, path: '/videoClient'});
 var _uniqueClientId = 1;
 
-var socketError = function() { /* ignore */ };
+var socketError = function() {};
 socketServer.on('connection', function(socket) {
   // Send magic bytes and video size to the newly connected socket
   // struct {char magic[4]; unsigned short width, height;}
@@ -91,37 +97,34 @@ socketServer.on('connection', function(socket) {
 
 
 // HTTP Server to accept incomming MPEG Stream
-var streamServer = require('http').createServer( function(request, response) {
+function receiveMPEG(request, response) {
   var params = request.url.substr(1).split('/');
-  width = (params[1] || 320)|0;
-  height = (params[2] || 240)|0;
+  width = (params[0] || 160)|0;
+  height = (params[1] || 120)|0;
   
-  if( params[0] == STREAM_SECRET ) {
-    console.log('Stream Connected: ' + request.socket.remoteAddress + ':' + request.socket.remotePort + ' size: ' + width + 'x' + height);
-    request.on('data', function(data) {
-      for( c in clients ) {
-        clients[c].send(data, {binary:true}, socketError);
-      }
-    });
-  }
-  else {
-    console.log('Failed Stream Connection: '+ request.socket.remoteAddress + request.socket.remotePort + ' - wrong secret.');
-    response.end();
-  }
-}).listen(STREAM_PORT);
+  console.log('Stream Connected: ' + request.socket.remoteAddress + ':' + request.socket.remotePort + ' size: ' + width + 'x' + height);
+  request.on('data', function(data) {
+    for( c in clients ) {
+      clients[c].send(data, {binary:true}, socketError);
+    }
+  });
+}
 
-console.log('Listening for MPEG Stream on http://127.0.0.1:' + STREAM_PORT + '/<secret>/<width>/<height>');
-console.log('Awaiting WebSocket connections on ws://127.0.0.1:' + WEBSOCKET_PORT + '/');
+app.use(STREAM_SECRET, receiveMPEG);
+//).listen(8082, IP);
+
+console.log('Listening for MPEG Stream on http://' + IP + ':' + FILE_PORT + '/<secret>/<width>/<height>');
 
 /////////
 // CLI //
 /////////
 
+
+
 var cli = repl.start({});
 cli.context.app = app;
-cli.context.httpServer = httpServer;
+cli.context.httpForStatics = httpForStatics;
 cli.context.controlSocketToThePI = controlSocketToThePI;
-cli.context.connectionToPi = connectionToPi;
 cli.context.controlSocketServer = controlSocketServer;
-cli.context.clients = clients;
-cli.context.socketServer = socketServer;
+//cli.context.clients = clients;
+//cli.context.socketServer = socketServer;

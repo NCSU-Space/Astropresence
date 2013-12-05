@@ -114,8 +114,12 @@ var ctx = canvas.getContext('2d');
 ctx.fillStyle = '#444';
 ctx.fillText('Loading...', canvas.width/2-30, canvas.height/3);
 
-// Setup the WebSocket connection and start the player
-var client = new WebSocket(document.URL.replace("http://", "ws://") + 'videoClient/');
+// Setup the WebSocket connection and start the player (OpenShift moves websockets to port 8000)
+if(location.host.search('.rhcloud.com') !== -1) {
+  var client = new WebSocket('ws://' + location.hostname + ':' + 8000 + '/videoClient');
+} else {
+  var client = new WebSocket('ws://' + location.host + '/videoClient');
+}
 var player = new jsmpeg(client, {canvas:canvas});
 </script>
 
@@ -174,7 +178,12 @@ var rover = new function Rover()
   
   try
   {
-    var webSocket = new WebSocket(document.URL.replace("http://", "ws://") + 'controlClient/'/*.replace(":8080", ":8088")*/);
+    // OpenShift moves websockets to port 8000)
+    if(location.host.search('.rhcloud.com') !== -1) {
+      var webSocket = new WebSocket('ws://' + location.hostname + ':' + 8000 + '/controlClient');
+    } else {
+      var webSocket = new WebSocket('ws://' + location.host + '/controlClient');
+    }
   }
   catch(error)
   {

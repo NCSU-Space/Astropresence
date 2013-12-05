@@ -4,8 +4,13 @@ var repl = require('repl');
 
 process.title = 'tele_client_on_drone';
 
+if(process.argv[2] === undefined) {
+  console.log('Usage: node rover.js [Server IP]:[WebSocket port]');
+  console.log('If you don\'t know which port the server is using, it\'s probably 8080');
+}
+
 // Open connection to server - how to not hard-code this?
-controlSocket = new ws('ws://192.168.0.101/controlDrone/');
+controlSocket = new ws('ws://' + process.argv[2] + '/controlDrone');
 
 controlSocket.on('open', function() {
   console.log('Opened control socket connection');
