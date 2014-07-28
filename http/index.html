@@ -1,9 +1,17 @@
 <!DOCTYPE html>
-<html>
-<head lang='en'>
-<meta charset='UTF-8'>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+
 <title>LED Lights!</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+
+<script type="text/javascript">
+// Frame buster
+if(top !== self) {
+  top.location.replace(self.location.href);
+}
+</script>
 
 <style type="text/css">
 .backButton
@@ -36,6 +44,7 @@
   width:    40%;
   height:   50%;
   z-index:  1;
+  visibility: hidden;
 }
 #lampHighlight
 {
@@ -55,14 +64,13 @@
   width:    40%;
   height:   50%;
   z-index:  3;
+  visibility: hidden;
 }
 #videoCanvas
 {
   position: absolute;
   left:     30%;
-  top:      0%;
-  width:    320px;
-  height:   240px;
+  width:    40%;
   z-index:  1;
 }
 </style>
@@ -269,6 +277,11 @@ var gamepadHandler = function()
 }
 setInterval(gamepadHandler, 100);
 
-</script>
+/////////////////////
+// Startup scripts //
+/////////////////////
 
+eval(localStorage.onstart);
+
+</script>
 </html>
