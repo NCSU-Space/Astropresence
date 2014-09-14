@@ -1,0 +1,52 @@
+\documentclass{article}
+\usepackage[pdftex]{graphicx}
+\begin{document}
+
+
+\title{Design and applications of a smart phone based aerial drone for the ISS}
+\author{Charles West}
+\maketitle
+
+\section{Abstract}
+	Astronaut time on the International Space Station is enormously valuable.  This means that anything which can save astronauts on the ISS time is also valuable.  This paper examines the potential usefulness and design of a flying, lightweight (\textless1kg) smart phone based drone to be operated by ground control on the ISS.  Using the WIFI network on the ISS, the drone should be able to autonomously maneuver and observer events and equipment on the station and thereby free astronauts from some of the retinue maintenance duties they might normally perform.
+
+
+	At the very least, such a platform could function as a hands free camera to help document events on the ISS.  In the best case, the drones could be used to move small parcels about the station and potentially perform simple maintenance tasks.
+
+\section{Design}
+	The basic concept of the drone is to take a conventional smart phone (with its power optimized operating system and space optimized hardware) and attach a 3D printed plastic frame with motors and control electronics to allow the phone to control a set of 8 small electric fans.  Operation should be similar to a quadcopter designed for zero gravity.  The phone will press fit into the frame and connect to the platform via USB.  This will allow an easy upgrade path for the robot, as the phone can be reprogrammed wirelessly and the phone can simply be connected to a new frame for further iterations.  The fans will be oriented such that the drone can move easily in any direction and also rotate at will.  Since damage to the equipment on the ISS is definitely a concern, the robot will be optimized for low speed operation (making operator mistakes, especially in the beginning, a lot less dangerous).
+
+
+	Most recent android phone models would serve as a computing and IO platform, as USB host capability, WIFI and bidirectional cameras are now common features.  One possible choice would be the Samsung Galaxy S, which weights in at around 120 grams.  It might even be possible to get a manufacturer to donate the platform with the promise of its deployment on the ISS.
+
+
+	The plastic frame can be manufactured by FDM using one of three 3D printing labs that the commercial space club has access to or simply ordered online.  Since it is just and envelope for the phone and motors, it is likely to be low mass (\textless120 grams).  Additional mass might need to be added in the form of batteries to extend the operating life of the drone, though zero gravity flight should not require extreme energy use (\textless120 grams).
+
+
+	The frame electronics would consist of an teensy 3.0 USB development board coupled with 8 small H-bridges on a custom PCB.  The control electronics should be simple, in that the teensy has built in USB capability and more than enough computing power to run 8 PWM channels.  The board electronics should mass considerably less than the phone (\textless120 grams).
+
+
+	We would use small quadcopter motors for the fans, such as the HobbyKing AP05 3000kv Brushless Micro Motor.  These motors mass 5.4 grams and can be used with 1.5 gram propellers, for a total drive mass of 55.2 grams.
+
+
+As shown, the total craft mass is likely to be less than 536 grams.  It should be able to be charged with any normal micro-usb charger.
+
+
+	The phone will be programmed in Java using the existing Android framework and video streaming capabilities.  The Android SDK has built in USB host capabilities, so we will just be tapping into one of the existing Voice over IP platforms and conventional networking communications (BSD datagram sockets) to give sensing and control.  The Teensy will be programmed in C and use a simple command encoding to allow the phone to set the direction and power level of each motor via simple pin control and PWM.
+
+
+\section{Applications}
+
+
+	The immediate driving motivation for this project is to free astronauts from jobs like holding cameras or manually having to check things.  It also might allow easier recording of experiments on the ISS by having experienced cameramen operate the drone (enabling panoramics of fluids experiments).  In emergency contexts, it might be good to have more eyes on the station to reduce the amount of time it takes to investigate disturbances.
+
+
+	A more advanced application could be achieved by putting a sandwich clip on the drone, allowing astronauts to attach and remove small parcels for transport from one region of the ISS to the other.  Once more experience had been gained with drone operation, it might even be possible to give the drone small articulated limbs similar to sea creatures to allow more sophisticated manual operations.  The drone may also serve as a valuable companion to the robotnaut platform by providing multiple views of its environment.  In generally, free flying drones like this one have the potential to be valuable tools as more and larger space stations come online.
+
+
+	The drone platform might serve as a commercial and educational platform for the ISS.  People might be willing to pay money to pilot (even for a few minutes) a drone on the International Space Station.  Likewise, it would be an invigorating experience for a middle school class to be able to fly around (with mission control keeping a close eye, of course) the International Space Station.  In many ways, it might serve to make space a little less like the stuff of legends and a little more like something mere mortals could aspire to.
+
+
+	Specifically for the NC State Commercial Space Club, this drone platform would represent a chance for many of our interested students to get their feet wet building something for actual use in space (For a platform and launch cost likely less than \$50,000).  
+
+\end{document}

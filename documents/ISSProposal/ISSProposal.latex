@@ -1,0 +1,108 @@
+\documentclass{article}
+\usepackage[pdftex]{graphicx}
+\usepackage{titling}
+\newcommand{\subtitle}[1]{%
+  \posttitle{%
+    \par\end{center}
+    \begin{center}\large#1\end{center}
+    \vskip0.5em}%
+}
+\begin{document}
+
+
+\title{AstroPresence}
+\subtitle{A small lightweight free-flying drone to support ISS operations and outreach}
+\author{Charles West}
+\maketitle
+
+\section{Abstract}
+	This proposal describes a simple design to create an inexpensive Android based free-flying telepresence platform for the International Space Station.  This platform could enable more than 6 potential missions:
+
+
+1. Telepresence/remote assistance for astronauts via ground control (Telepresence version of the Personal Satellite Assistant) 
+
+2. Educational tours aboard the ISS.  Thousands of classrooms being able to actually interact with the station and the work being done there, without tying up valuable Astronaut time but carefully supervised by ground control. 
+
+3. Commercial opportunity:  Allow anyone to fly around the ISS (with certain restrictions) for 10 minutes at a cost of \$50 to \$100 dollars.  Even such a relatively low price point would pay for NASA employees to supervise all telepresence operations and support the further development of free flying drones for station operations.
+
+4. Telepresence cargo/parcel transport aboard the ISS 
+
+5. A modular platform for the development inexpensive and upgradeable free flying zero gravity robots (open source platform) 
+
+6. Documenting experiments and providing hands free recording for Astronauts
+
+\section{Sponsoring Organization}
+	The NC State Commercial Space Club was founded in 2012 with the express purpose of educating students about the opportunities in space and the creation of space based startups.  The Commercial Space club is currently working on four research projects, ranging from Cubesats to waste processing for closed ecosystems.
+
+Charles West (resume attached) is a graduate of NC State University Industrial and Systems Engineering program, creator of Vision Mosaics and founder of the Commercial Space Club.
+
+Harshad Srinivasan (resume attached) is pursuing a Doctorate in the NC State University Industrial and Systems Engineering program and is expert in 3D fabrication and mechanical design.
+
+\section{Project Plan}
+
+	The basic concept of the drone is to take a conventional smart phone (with its power optimized operating system and space optimized hardware) and attach a 3D printed plastic frame with motors and control electronics to allow the phone to control a set of 8 small electric ducted fans.  Operation should be similar to a quadcopter designed for zero gravity.  The phone will press fit into the frame and connect to the platform via USB.  This will allow an easy upgrade path for the robot, as the phone can be reprogrammed wirelessly and further iterations can be implemented by snapping the phone into a new frame.  The fans will be oriented such that the drone can move easily in any direction and also rotate at will.  Since damage to the equipment on the ISS is a strong concern, the robot will be optimized for low speed operation and have the fans covered. 
+
+	Most recent android phone models would serve as a computing and IO platform, as USB host capability, WIFI, Gyroscopes and bidirectional cameras are now common features.  We will be using Google Nexus S (129 g).  This phone has already been deployed on the ISS in support of the Smart SPHERES project.  This means that the Nexus S has already been tested for suitability aboard the station and the necessary modifications are already known.  Opensource software for video streaming and control has been developed and will be usable for this project.
+
+	The plastic frame will be manufactured by FDM using one of three 3D printing labs that the commercial space club has access to or simply ordered online.  Since it is just an envelope for the phone and motors, it is likely to be low mass (\textless120 grams).
+
+	Finding suitable rechargeable batteries can be a problem for operations on the ISS.   According to standing NASA protocol, any unapproved/new battery that is recharged aboard the ISS must be actively watched by Astronauts for the entirety of its charging duration.  This creates a strong incentive to use batteries which have already been approved.  Current known possibilities are the Nikon EN-EL4A (used for camcorders aboard the station) and DeWalt powerdrill batteries (recently approved for the SPHERES project).  Since Astronaut time is extremely valuable, we would like to develop a docking apparatus for automatic recharging of the drone.  If that is not possible (due to safety concerns), it would likely be advisable to use large batteries (possibly as large as the rest of the drone) to extend operational life between recharging and minimize the recharging burden on the Astronauts.
+
+	We have not yet conducted extensive studies of the power drain that will occur when the smartphone streams video over a WIFI network, but we used other high drain activities to try to estimate operational time between recharging.  Some reports give the Google Nexus S 8.1 hours of video playback on a single battery charge.  Assuming streaming video is comparable to playing video (testing will be done), this means that you could expect approximately 30 hrs of operation from a Nikon battery (114 grams) and 87 hrs of operation from some DeWalt drill batteries (644 grams).
+
+	The frame electronics would consist of an teensy 3.0 USB development board coupled with 8 small H-bridges on a custom PCB.  The control electronics should be simple, in that the teensy has built in USB capability and more than enough computing power to run 8 PWM channels.  The board electronics should mass considerably less than the phone (\textless120 grams). 
+
+	We would use small quadcopter motors for the fans, such as the HobbyKing AP05 3000kv Brushless Micro Motor.  These motors mass 5.4 grams and can be used with 1.5 gram propellers, for a total drive mass of 55.2 grams. 
+
+	As shown, the total craft mass is likely to be less than 539 grams with a Nikon battery and 1069 grams with a DeWalt battery.  
+
+	The phone will be programmed in Java using the existing Android framework and video streaming capabilities.  The Android SDK has built in USB host capabilities, open source projects such as SIPDroid can provide video telephony over WIFI and conventional networking communications (BSD datagram sockets) will give sensing and control.  The Teensy will be programmed in C and use a simple command encoding to allow the phone to set the direction and power level of each motor via simple pin control and PWM.
+
+	On control side, an ideal solution would be to develop a set of Java applets that would allow control of the drone through a web browser interface.  This will allow easy deployment of interfaces in a educational or commercial setting.  Used by NASA personnel, the applet would allow a ground control team member to autonomously navigate the ISS and perform tasks which might otherwise require an astronaut.  In an educational or commercial setting, the terminal will be set up in a pair system.  The inexperienced party, such as a high school or college class, will control the drone from a web browser at their location but a NASA employee will also get the video feed and be able to override or disable the amateur controllers at any time.  This will allow safe interaction and exploration of the ISS by the general public, allowing over 15,000 people or classes to personally interact with the ISS every year with just one drone.  With multiple drones, it will be possible to allow every high school in the United States a chance to personally interact with the ISS every year. 
+
+\section{Science requirements}
+The telepresence drone will need to be able to connect with a wireless network and communicate with a terminal on the ground.  A wireless N network is currently available onboard the station but some projects have had difficulty accessing it.  Since the network is used for mission critical data, there is a great deal of concern that one of the none mission critical projects could cause interference if given access to the wireless network.  One potential solution might be to deploy a second wireless network (if only in a few modules) which all nonmission critical projects could use.
+
+The telepresence drone will need batteries and a way to recharge them.  It may be possible to develop a way for the drone to dock with the recharging station without astronaut assistance, but the main obstacle is getting the batteries and recharging method approved for use.  If we are allowed to develop and use an automatic recharging station, that would allow the drone to operate without requiring Astronaut intervention.
+
+The telepresence drone will need at least one module that it is cleared to fly in.
+
+The telepresence drone will require 300kbps to 500kbps of downlink bandwidth during operation and a small but constant uplink amount.  If the phone is used to do face chat with Astronauts, it will require 300kbps to 500kbps of uplink as well.
+
+The telepresence drone will require an Astronaut to remove it from its packaging, turn it on, and connect it to a wireless network.
+
+\section{Benefits}
+
+	Space has been the domain of legends, a destination visited only by people of well nigh supernatural ability and prowess.  This needs to change if the commercialization and eventual colonization of space is to proceed.
+
+	There have been approximately 557 astronauts to date.  For every drone that is placed onboard the International Space Station, approximately 17,000 people can personally interact with the ISS and  fly in zero gravity every year.  With 3 drones (or 1 drone that operates continuously), every high school in the United States could pilot a drone for ten minutes every year.  With 15 drones, you would start seeing physics classes being taught by demonstration in a zero g laboratory (255,000 slots on a 8 hour schedule, 765,000 on a 24 hr schedule).  Space would not be a far off dream, it would be something that people could look at, touch and feel.  The educational and public relations possibilities presented by this platform cannot be overstated.
+
+	Many nontechnical people seem to believe that you have to be a rocket scientist to do anything in space and that there is not a clear benefit to money spent on the space program.  It is also unclear to the layman exactly what benefits are derived from work done in the ISS.  This lack of knowledge and interaction has a tendency to reduce public support for NASA and that lack of public support translates into a lack of funding.  This project would allow NASA and the ISS to directly show case both the work being done aboard the station but also the enormous potential of space processes.  It would also provide a direct educational benefit, as Newtonian mechanics are obvious in a zero gravity setting and this project would allow demonstration of the basic principles of mechanics.
+
+	Furthermore, if thousands of highschool students can personally do telepresence operations onboard a space station, the idea of using telepresence or robotics to pave the way for human exploration of the solar system is going to seem natural.  Even ten years ago, the idea of a computer phone seemed foreign.  Now smart phones are commonplace and so are the concepts associated with them.  This project would enable dissemination of the idea of telepresence and space by virtual of allowing thousands of people to experience it in a familiar setting.
+
+	In addition, this platform has the potential to allow for a much more efficient use of Astronaut time.  There are monotonous tasks which need to be performed (such as watching unapproved batteries charging to make sure they don't explode, or monitoring the SPHERES), that currently require hours of attention from people in a position where each day costs millions of dollars.  Eventually, it might be possible to develop telepresence platforms that can do tasks such as parcel transfer from on part of the station to another.  Where simple vision is used for oversight, there is no reason why someone on the ground can't use a telepresence drone to do the job and free an Astronaut for more important work.
+
+	The International Space Station is large and getting from one side to the other.  This means that even simple operations such as moving a tool or food package from one part of the station to another can take a significant amount of Astronaut time.  This is especially apparent when the Astronauts need to unload supply capsules.  Adding a simple laundry clip to the Astropresence drone would allow Astronauts to transport small parcels from one side of the station to another without needing repeatedly travel through the station, saving Astronauts considerable time and allowing more operations to be done on the ISS.
+
+	In addition, the simple and open format of this platform (opensource applications running on a commercially available phone platform, connected to a physical chassis using USB) allow easy extension of the basic concept.  Once this platform is proven, it would be straightforward for researchers and companies to start designing other free flying robotic bodies which could include limbs for manipulating objects and allow incremental development of more sophisticated telepresence operations for zero gravity environments.  In addition, further developments in space could potentially design storage systems to work with free flying drones to allow storage and relocation of tools and supplies    
+
+	Lastly, this platform presents a financial opportunity both for the American people and for the start-up which might be created around this drone.  Operating a 8 hours a day and charging \$50 per ten minute slot to fly, this platform could generate \$876,000 of revenue annually per drone.  Likely 20\% or more of that would be paid as taxes back to the government, in addition to the charge to use the bandwidth and the ISS facility.  In addition, at least one new full time job would be generated for every drone, since each functioning public drone would have a dedicated person to keep the drone from harming the station.  This start-up would be the first (hopefully successful) company to emerge from the Commercial Space Club, an organization devoted to training and inspiring emerging sector of space entrepreneurs.  Given the goals of the company creators, the profits obtained would be largely used to create more space related startups and expand the Commercial Space Club to more college campuses.
+
+	In summary, this project has a mass of less than a kilogram, requires minimal Astronaut time, could show thousands of students the wonder of space every year, could make substantial profit and has the potential to transform outreach for the ISS.
+
+\section{Funding requirements and time frame}
+
+	If the project is approved for placement and operation aboard the International Space Station, we will move rapidly to complete the project and begin testing.  Depending on the testing requirements to prove the drone capable of safe operation aboard the ISS, we believe that we can complete the hardware and software required for this project by May 1st, 2013.
+
+	If the development team receives guarantees that the drone can be delivered and the science requirements would be met, it would be more than happy to develop the required hardware and software for free.  The main funding requirement would be delivering a 1-2 lb package to the ISS and unpacking it.  Once the first drone is evaluated, we could move forward with public outreach and commercialization.
+
+
+\begin{figure}[htbp]
+\centering
+   \includegraphics[scale=0.8]{./images/simplePicture.png}
+    \caption{Simple Drone artistic rendering}
+\hspace{.3in}
+\end{figure}
+
+\end{document}
