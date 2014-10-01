@@ -1,10 +1,10 @@
 # Astropresence #
 
-Telepresence drone, but in space (eventually)!
+Telepresence bot, but in space (eventually)!
 
 ## Setup ##
 
-Current design involves a central server, a Rapberry Pi based rover which connects to the server, and a webapp for serving to users.
+Current design involves a central server, a computer on the bot which connects to the server, and a webapp for serving to users.
 
 ### Server ###
 
@@ -20,7 +20,7 @@ Next, you need nodejs.  On Fedora, run as root:
 yum install nodejs
 ~~~
 
-Most major distros will have nodejs in their repos.  npm may be packaged separately.
+Most major distros will have nodejs in their repos. npm may somtimes be packaged separately.
 
 Use node's specialized package manager to install dependencies:
 
@@ -29,43 +29,25 @@ cd ./Astropresence
 npm install
 ~~~
 
-The server needs to receive connections on ports 8080 and 8082, so make sure these are open on your firewall.  The client wepabb also contains references to the server's ip address.  For now, you'll need to adjust these manually.  All references are in Astropresence/http/index.html and can be found by search for references to port 8080.
-
 Finally, you can start the server:
 
+By default, the server listens on port 8080 on all available IPs (0.0.0.0), and will need TCP port 8080 opened in your firewall. This bahavior can be adjusted with command line option or the config.json file.
+
 ~~~
-node server.js
+# To run with defaults:
+node server.js # Listens on 0.0.0.0:8080, make sure TCP port 8080 is open
+
+# Or with custom options:
+node server.js -i 192.168.0.100 -p 1234 # Listens on 192.168.0.100:1234, make sure TCP port 1234 is open
 ~~~
 
 Note that the command is 'nodejs' instead of 'node' on some distros.
 
 ### Rover ###
 
-This setup uses the Raspberry Pi for now.  It includes a fork of pi-gpio in Astropresence/node_modules modified to work with the revision 2 boards.  Rev. 1 users will need to replace with the original or follow my comments in pi-gpio.js to put it back.  The left motor is wired to GPIO pins 13 and 15, the right motor to 7 and 11, and an LED to 12.
+This setup used to use the Raspberry Pi, but is now being moved to standard linux (as in no built-in GPIO) paired with an arduino or similar. The microcontroller part is still in development.
 
-A separate program called gpio-admin is required by the gpio library (details at https://github.com/quick2wire/quick2wire-gpio-admin):
-
-~~~
-git clone https://github.com/quick2wire/quick2wire-gpio-admin.git
-cd ./quick2wire-gpio-admin
-make
-sudo make install
-sudo adduser $USER gpio
-~~~
-
-For some scripting, such as auto-starting on the pi, you will also need to link the gpio-admin binary to /bin.  On my setup this command worked, though you may need to check the location of the original binary using gpio-admin's Makefile.
-
-~~~
-ln /usr/local/bin/gpio-admin /bin/gpio-admin
-~~~
-
-For some reason, gpio-admin also requires a reboot/relog:
-
-~~~
-sudo shutdown -r now
-~~~
-
-You'll also need nodejs, this repo, and npm dependencies on the Pi:
+You'll need nodejs, this repo, npm dependencies, and ffmpeg:
 
 ~~~
 git clone https://github.com/NCSU-Space/Astropresence.git
@@ -73,21 +55,34 @@ sudo apt-get install nodejs
 sudo apt-get install npm
 cd ./Astropresence
 npm install
+sudo apt-get install ffmpeg # I forget if ffmpeg required any other setup
 ~~~
 
-Now look through rover.js until you find an IP address, and replace it with the one for you server.  Then you can start the node-based control receiver:
+Rover.js doesn't actually work right now, but if it did you would need to give it the server's ip and port when starting it:
 
 ~~~
-nodejs rover.js
+nodejs rover.js [Your server's IP]:[Your server's port]
 ~~~
 
-Finally, start ffmpeg to send video from the Pi (replace the IP with your server's):
+Finally, start ffmpeg to send video from the bot:
 
 ~~~
-ffmpeg -s 160x120 -f video4linux2 -i /dev/video0 -f mpeg1video -b 800k -r 20 http://192.168.0.101:8082/s3cret/160/120/
+ffmpeg -s 640x480 -f video4linux2 -i /dev/video0 -f mpeg1video -b 800k -r 20 http://[your server address]:8080/videoDrone/640/480
+# Replace /dev/video0 with you camera differs. For some reason, the resolution has to be specified in two places in that line, so be careful when changing it
 ~~~
 
-To set autoconnecting on the Pi, place the commands to start nodejs and ffmpeg in /etc/rc.local.  Last I checked, autoconnecting to wifi was done through /etc/network/interfaces.  The interfaces file I use is in this repo for use as a guide.
+To set autoconnecting on the bot, place the commands to start nodejs and ffmpeg in your crontab:
+
+~~~
+crontab -e
+# Use your chosen text editor to add the lines:
+@reboot nodejs rover.js [Your server's IP]:[Your server's port]
+@reboot ffmpeg -s 640x480 -f video4linux2 -i /dev/video0 -f mpeg1video -b 800k -r 20 http://[your server address]:8080/videoDrone/640/480
+~~~
+
+### Client ###
+
+Navigate a web browser to http://[Your server's IP]:[Your server's port]/
 
 ## Network Layout ##
 
@@ -98,8 +93,8 @@ To set autoconnecting on the Pi, place the commands to start nodejs and ffmpeg i
 |                                   |                                        |                                  |
 |                                   |  HTTP:8080/                           <-> Browser requests page           |
 |                                   |  WS:8080/controlClient/               <-> JS app sends commands           |
-|  Python script receives commands <-> WS:8080/controlDrone/                 |                                  |
-|  ffmpeg sends video              <-> HTTP:8082/[secret]/[width]/[height]/  |                                  |
+|  Node script receives commands   <-> WS:8080/controlDrone/                 |                                  |
+|  ffmpeg sends video              <-> HTTP:8080/videoDrone/[width]/[height]/|                                  |
 |                                   |  WS:8080/videoClient/                 <-> JS app receives video           |
 -----------------------------------------------------------------------------------------------------------------
 ~~~

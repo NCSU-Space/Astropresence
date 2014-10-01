@@ -82,6 +82,7 @@ console.log(new Date().toUTCString() + ': Static file server listening at http:/
 
 // These link to rover side
 var controlSocketToThePI = new ws.Server({server: httpServer, path: '/controlDrone'});
+console.log(new Date().toUTCString() + ': WS control server listening for drone at http://' + options.ip + ':' + options.port + '/controlDrone');
 
 controlSocketToThePI.on('connection', function(connection) {
   console.log('Received connection from Pi');
@@ -93,6 +94,7 @@ controlSocketToThePI.on('connection', function(connection) {
 
 // And these link to client(s)
 var controlSocketServer = new ws.Server({server: httpServer, path: '/controlClient'});
+console.log(new Date().toUTCString() + ': WS control server listening for clients at http://' + options.ip + ':' + options.port + '/controlClient');
 
 controlSocketServer.on('connection', function(connection) {
   console.log(new Date().toUTCString() + ': Received WebSocket at :' + options.port + '/controlClient');
@@ -115,10 +117,7 @@ controlSocketServer.on('connection', function(connection) {
 // Video part from those iOS devs //
 ////////////////////////////////////
 
-var STREAM_PORT = 8082,
-    STREAM_SECRET = '/videoDrone', // CHANGE THIS!
-    WEBSOCKET_PORT = 8080,
-    STREAM_MAGIC_BYTES = 'jsmp'; // Must be 4 bytes
+var STREAM_MAGIC_BYTES = 'jsmp'; // Must be 4 bytes
 
 var clients = {};
 var width = 640,
@@ -126,6 +125,8 @@ var width = 640,
 
 // Websocket Server
 var socketServer = new (ws.Server)({server: httpServer, path: '/videoClient'});
+console.log(new Date().toUTCString() + ': WS video server listening at http://' + options.ip + ':' + options.port + '/videoClient');
+
 var _uniqueClientId = 1;
 
 var socketError = function() {};
@@ -165,9 +166,9 @@ function receiveMPEG(request, response) {
   });
 }
 
-app.use(STREAM_SECRET, receiveMPEG);
+app.use('/videoDrone', receiveMPEG);
 
-console.log('Listening for MPEG Stream on http://' + options.ip + ':' + options.port + '/<secret>/<width>/<height>');
+console.log(new Date().toUTCString() + ': Listening for MPEG Stream on http://' + options.ip + ':' + options.port + '/videoDrone/<width>/<height>');
 
 /////////
 // CLI //
