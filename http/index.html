@@ -14,99 +14,23 @@ if(top !== self) {
 </script>
 
 <style type="text/css">
-.backButton
-{
+#videoContainer {
   position: absolute;
-  width:    30%;
-  height:   50%;
+  top: 0;
+  bottom: 0;
+  left:     0;
+  right: 0;
   z-index:  1;
 }
-.foreButton
-{
-  position: absolute;
-  width:    30%;
-  height:   50%;
-  z-index:  2;
-  visibility: hidden;
-}
-.clickerButton
-{
-  position: absolute;
-  width:    30%;
-  height:   50%;
-  z-index:  3;
-}
-#backingLamp
-{
-  position: absolute;
-  left:     30%;
-  top:      50%;
-  width:    40%;
-  height:   50%;
-  z-index:  1;
-  visibility: hidden;
-}
-#lampHighlight
-{
-  position: absolute;
-  left:     30%;
-  top:      50%;
-  width:    40%;
-  height:   50%;
-  z-index:  2;
-  visibility: hidden;
-}
-#clickerLamp
-{
-  position: absolute;
-  left:     30%;
-  top:      50%;
-  width:    40%;
-  height:   50%;
-  z-index:  3;
-  visibility: hidden;
-}
-#videoCanvas
-{
-  position: absolute;
-  left:     30%;
-  width:    40%;
-  z-index:  1;
+#videoCanvas {
 }
 </style>
 </head>
 
 <body>
-<img src="icon_up_arrow.svg" class="backButton" style="top: 0%; left: 0%;"></img>
-<img id="leftForwardHighlight" src="icon_up_arrow_highlighted.svg" class="foreButton" style="top: 0%; left: 0%;"></img>
-<div id="clickerLeftForward" class="clickerButton" style="top: 0%; left: 0%;"></div>
-
-<img src="icon_down_arrow.svg" class="backButton" style="top: 50%; left: 0%;"></img>
-<img id="leftBackwardHighlight" src="icon_down_arrow_highlighted.svg" class="foreButton" style="top: 50%; left: 0%;"></img>
-<div id="clickerLeftBack" class="clickerButton" style="top: 50%; left: 0%;"></div>
-
-<img src="icon_up_arrow.svg" class="backButton" style="top: 0%; left: 70%;"></img>
-<img id="rightForwardHighlight" src="icon_up_arrow_highlighted.svg" class="foreButton" style="top: 0%; left: 70%;"></img>
-<div id="clickerRightForward" class="clickerButton" style="top: 0%; left: 70%;"></div>
-
-<img src="icon_down_arrow.svg" class="backButton" style="top: 50%; left: 70%;"></img>
-<img id="rightBackwardHighlight" src="icon_down_arrow_highlighted.svg" class="foreButton" style="top: 50%; left: 70%;"></img>
-<div id="clickerRightBack" class="clickerButton" style="top: 50%; left: 70%;"></div>
-
-<img id="backingLamp" src="icon_lamp.svg"></img>
-<img id="lampHighlight" src="icon_lamp_highlighted.svg"></img>
-<div id="clickerLamp"></div>
-
 <!-- Code from iOS video devs -->
 
-<canvas id="videoCanvas" width="160" height="120">
-<p>
-Please use a browser that supports the Canvas Element, like
-<a href="http://www.google.com/chrome">Chrome</a>,
-<a href="http://www.mozilla.com/firefox/">Firefox</a>,
-<a href="http://www.apple.com/safari/">Safari</a> or Internet Explorer 10
-</p>
-</canvas>
+<div id="videoContainer"><canvas id="videoCanvas" width="160" height="120" /></div>
 
 <!-- End code from iOS video devs -->
 
@@ -170,12 +94,6 @@ var rover = new function Rover()
       document.title = "Left motor: " + motorLeft + ", Right motor: " + motorRight + ", Lamp: " + lamp;
       
       if(webSocket && webSocket.readyState === 1) webSocket.send(JSON.stringify({motorLeft: motorLeft, motorRight: motorRight, lamp: lamp}));
-      
-      document.getElementById("lampHighlight"         ).style.visibility = lamp       ===  1 ? "visible" : "hidden";
-      document.getElementById("leftForwardHighlight"  ).style.visibility = motorLeft  ===  1 ? "visible" : "hidden";
-      document.getElementById("leftBackwardHighlight" ).style.visibility = motorLeft  === -1 ? "visible" : "hidden";
-      document.getElementById("rightForwardHighlight" ).style.visibility = motorRight ===  1 ? "visible" : "hidden";
-      document.getElementById("rightBackwardHighlight").style.visibility = motorRight === -1 ? "visible" : "hidden";
     }
     
     previous.motorLeft = motorLeft;
@@ -210,23 +128,17 @@ keyHandlers[68] = function(event) {rover.motorRightInputs.keyBackward = keysPres
 document.addEventListener("keydown", function(event)
 {
   keysPressed[event.keyCode] = true;
-  if(keyHandlers[event.keyCode])
-  {
-    keyHandlers[event.keyCode](event);
-    rover.update();
-  }
+  keyHandlers[event.keyCode](event);
+  rover.update();
 });
 
 document.addEventListener("keyup", function(event)
 {
   delete keysPressed[event.keyCode];
-  if(keyHandlers[event.keyCode])
-  {
-    keyHandlers[event.keyCode](event);
-    rover.update();
-  }
+  keyHandlers[event.keyCode](event);
+  rover.update();
 });
-
+/*
 // Must be named after id's of elements with mousedown/mouseup events
 var mouseHandlers = new Object();
 mouseHandlers.clickerLamp         = function(event) {rover.lampInputs.mouse       = event.type === "mousedown" ?  1 : 0; rover.update();}
@@ -253,7 +165,7 @@ for(var i in touchHandlers) if(document.getElementById(i) && touchHandlers[i])
   document.getElementById(i).addEventListener("touchstart", touchHandlers[i]);
   document.getElementById(i).addEventListener("touchend", touchHandlers[i]);
 }
-
+*/
 // This uses polling because gamepad events are not implemented anywhere at this time
 var gamepadHandler = function()
 {
