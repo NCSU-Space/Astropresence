@@ -59,133 +59,99 @@ var player = new jsmpeg(client, {canvas:canvas});
 
 <script type="text/javascript">
 
-var rover = new function Rover()
-{
-  var motorLeft  = 0, motorLeftInputs  = {keyForward: 0, keyBackward: 0, mouse: 0, touchForward: 0, touchBackward: 0, gamepad: 0},
-      motorRight = 0, motorRightInputs = {keyForward: 0, keyBackward: 0, mouse: 0, touchForward: 0, touchBackward: 0, gamepad: 0},
-      lamp = 0, lampInputs = {key: 0, mouse: 0, touch: 0, gamepad: 0},
-      previous = {motorLeft: 0, motorRight: 0, lamp: 0};
-  
-  Object.defineProperty(this, "motorLeftInputs" , {value: motorLeftInputs });
-  Object.defineProperty(this, "motorRightInputs", {value: motorRightInputs});
-  Object.defineProperty(this, "lampInputs"      , {value: lampInputs      });
-  
-  var update = function update()
-  {
-    // Update lamp from inputs.  Only (numeric) ones and zeroes allowed
-    lamp = Number(Boolean(lampInputs.key || lampInputs.mouse || lampInputs.touch || lampInputs.gamepad));
-    
-    // Update motors from inputs.  Only numbers from -1 to 1 allowed
-    motorLeft = Number(motorLeftInputs.keyForward   || -motorLeftInputs.keyBackward   ||
-                       motorLeftInputs.touchForward || -motorLeftInputs.touchBackward ||
-                       motorLeftInputs.mouse ||
-                       motorLeftInputs.gamepad);
-    if(motorLeft >  1) motorLeft =  1;
-    if(motorLeft < -1) motorLeft = -1;
-    motorRight = Number(motorRightInputs.keyForward   || -motorRightInputs.keyBackward   ||
-                        motorRightInputs.touchForward || -motorRightInputs.touchBackward ||
-                        motorRightInputs.mouse ||
-                        motorRightInputs.gamepad);
-    if(motorRight >  1) motorRight =  1;
-    if(motorRight < -1) motorRight = -1;
-    
-    if(previous.motorLeft !== motorLeft || previous.motorRight !== motorRight || previous.lamp !== lamp)
-    {
-      document.title = "Left motor: " + motorLeft + ", Right motor: " + motorRight + ", Lamp: " + lamp;
-      
-      if(webSocket && webSocket.readyState === 1) webSocket.send(JSON.stringify({motorLeft: motorLeft, motorRight: motorRight, lamp: lamp}));
-    }
-    
-    previous.motorLeft = motorLeft;
-    previous.motorRight = motorRight;
-    previous.lamp = lamp;
+try {
+  // OpenShift moves websockets to port 8000)
+  if(location.host.search('.rhcloud.com') !== -1) {
+    var webSocket = new WebSocket('ws://' + location.hostname + ':' + 8000 + '/controlClient');
+  } else {
+    var webSocket = new WebSocket('ws://' + location.host + '/controlClient');
   }
-  Object.defineProperty(this, "update", {value: update});
+}
+catch(error) {
+  console.log("Websocket connection failed with error: " + error.message);
+}
+
+var rover = {}
+rover.blank = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+rover.keyboard = rover.blank.slice();
+rover.gamepad = rover.blank.slice();
+rover.current = rover.blank.slice();
+rover.previous = rover.blank.slice();
+rover.message = {command: 'motors', motors: []};
+rover.merge = function(a, b) {
+  var result = rover.blank.slice();
   
-  try
-  {
-    // OpenShift moves websockets to port 8000)
-    if(location.host.search('.rhcloud.com') !== -1) {
-      var webSocket = new WebSocket('ws://' + location.hostname + ':' + 8000 + '/controlClient');
-    } else {
-      var webSocket = new WebSocket('ws://' + location.host + '/controlClient');
+  for(var i = 1, endi = 9; i < endi; ++i) {
+    result[i] = a[i] || b[i] || 0;
+  }
+  
+  return result;
+}
+rover.equals = function(a, b) {
+  var result = true;
+  
+  for(var i = 1, endi = 9; i < endi; ++i) {
+    if(a[i] !== b[i]) {
+      result = false;
     }
   }
-  catch(error)
-  {
-    console.log("Websocket connection failed with error: " + error.message);
+  
+  return result;
+}
+rover.pushIfChanged = function() {
+  rover.current = rover.merge(rover.keyboard, rover.gamepad);
+  
+  if(!rover.equals(rover.current, rover.previous)) {
+    rover.message.motors = rover.current;
+    webSocket.send(JSON.stringify(rover.message));
+    
+    rover.previous = rover.current.slice();
   }
 }
 
-var keysPressed = new Array();
-var keyHandlers = new Object();
-keyHandlers[32] = function(event) {rover.lampInputs.key               = keysPressed[32];} // Spacebar
-keyHandlers[81] = function(event) {rover.motorLeftInputs.keyForward   = keysPressed[81];} // Q Spacebar{rover.motorLeft  = event.type === "keydown" ?  1 : 0;} // Q
-keyHandlers[65] = function(event) {rover.motorLeftInputs.keyBackward  = keysPressed[65];} // A {rover.motorLeft  = event.type === "keydown" ? -1 : 0;} // A
-keyHandlers[69] = function(event) {rover.motorRightInputs.keyForward  = keysPressed[69];} // E {rover.motorRight = event.type === "keydown" ?  1 : 0;} // E
-keyHandlers[68] = function(event) {rover.motorRightInputs.keyBackward = keysPressed[68];} // D {rover.motorRight = event.type === "keydown" ? -1 : 0;} // D
+// Keydown handlers need to be shuffled on and off the keydownHandlers objects because JS doesn't have an 'inital keydown only' event
+var keysPressed     = [];
+var keydownHandlers = {};
+var keyupHandlers   = {};
+var mObject         = {};
 
-document.addEventListener("keydown", function(event)
-{
-  keysPressed[event.keyCode] = true;
-  keyHandlers[event.keyCode](event);
-  rover.update();
-});
-
-document.addEventListener("keyup", function(event)
-{
-  delete keysPressed[event.keyCode];
-  keyHandlers[event.keyCode](event);
-  rover.update();
-});
-/*
-// Must be named after id's of elements with mousedown/mouseup events
-var mouseHandlers = new Object();
-mouseHandlers.clickerLamp         = function(event) {rover.lampInputs.mouse       = event.type === "mousedown" ?  1 : 0; rover.update();}
-mouseHandlers.clickerLeftForward  = function(event) {rover.motorLeftInputs.mouse  = event.type === "mousedown" ?  1 : 0; rover.update();}
-mouseHandlers.clickerLeftBack     = function(event) {rover.motorLeftInputs.mouse  = event.type === "mousedown" ? -1 : 0; rover.update();}
-mouseHandlers.clickerRightForward = function(event) {rover.motorRightInputs.mouse = event.type === "mousedown" ?  1 : 0; rover.update();}
-mouseHandlers.clickerRightBack    = function(event) {rover.motorRightInputs.mouse = event.type === "mousedown" ? -1 : 0; rover.update();}
-
-for(var i in mouseHandlers) if(document.getElementById(i) && mouseHandlers[i])
-{
-  document.getElementById(i).addEventListener("mousedown", mouseHandlers[i]);
-  document.getElementById(i).addEventListener("mouseup", mouseHandlers[i]);
+for(var i = 1, endi = 9; i < endi; ++i) with({i: i}) {
+  keydownHandlers[48 + i] = function(e) {rover.keyboard[i] = e.type === 'keydown' ? 50 : 0} // 1-8 (keyboard)
 }
 
-var touchHandlers = new Object();
-touchHandlers.clickerLamp         = function(event) {rover.lampInputs.touch               = event.type === "touchstart" ? 1 : 0; rover.update();}
-touchHandlers.clickerLeftForward  = function(event) {rover.motorLeftInputs.touchForward   = event.type === "touchstart" ? 1 : 0; rover.update();}
-touchHandlers.clickerLeftBack     = function(event) {rover.motorLeftInputs.touchBackward  = event.type === "touchstart" ? 1 : 0; rover.update();}
-touchHandlers.clickerRightForward = function(event) {rover.motorRightInputs.touchForward  = event.type === "touchstart" ? 1 : 0; rover.update();}
-touchHandlers.clickerRightBack    = function(event) {rover.motorRightInputs.touchBackward = event.type === "touchstart" ? 1 : 0; rover.update();}
-
-for(var i in touchHandlers) if(document.getElementById(i) && touchHandlers[i])
-{
-  document.getElementById(i).addEventListener("touchstart", touchHandlers[i]);
-  document.getElementById(i).addEventListener("touchend", touchHandlers[i]);
+for(var i in keydownHandlers) {
+  keyupHandlers[i] = keydownHandlers[i];
 }
-*/
+
+document.addEventListener("keydown", function(e) {
+  keysPressed[e.keyCode] = true;
+  if(keydownHandlers[e.keyCode]) {
+    keydownHandlers[e.keyCode](e);
+    delete keydownHandlers[e.keyCode];
+    rover.pushIfChanged();
+  }
+});
+
+document.addEventListener("keyup", function(e) {
+  delete keysPressed[e.keyCode];
+  if(keyupHandlers[e.keyCode]) {
+    keyupHandlers[e.keyCode](e);
+    keydownHandlers[e.keyCode] = keyupHandlers[e.keyCode];
+    rover.pushIfChanged();
+  }
+});
+
 // This uses polling because gamepad events are not implemented anywhere at this time
-var gamepadHandler = function()
-{
-  try {
-    var gamepads = navigator.webkitGetGamepads();
-    
-    var gamepad;
-    try {
-      if(gamepads[0].id !== "") gamepad = gamepads[0];
-      if(gamepads[1].id !== "") gamepad = gamepads[1];
+var gamepadHandler = function() {
+  var gamepads = navigator.getGamepads();
+  
+  if(gamepads[0]) {
+    for(var i = 0, endi = 6; i < endi; ++i) {
+      rover.gamepad[i + 1] = Math.floor(gamepads[0].axes[i]*255);
+      
+      rover.pushIfChanged();
     }
-    catch(error) {}
   }
-  catch(error) {return;} // Make all the errors shut up
-  
-  rover.lampInputs.gamepad = gamepad.buttons[2];
-  rover.motorLeftInputs.gamepad  = gamepad.axes[1] > 0.15 || gamepad.axes[1] < -0.15 ? -gamepad.axes[1] : 0;
-  rover.motorRightInputs.gamepad = gamepad.axes[3] > 0.15 || gamepad.axes[3] < -0.15 ? -gamepad.axes[3] : 0;
-  
-  rover.update();
 }
 setInterval(gamepadHandler, 100);
 
