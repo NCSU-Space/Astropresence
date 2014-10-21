@@ -97,11 +97,11 @@ The telepresence drone will require an Astronaut to remove it from its packaging
 
 	If the development team receives guarantees that the drone can be delivered and the science requirements would be met, it would be more than happy to develop the required hardware and software for free.  The main funding requirement would be delivering a 1-2 lb package to the ISS and unpacking it.  Once the first drone is evaluated, we could move forward with public outreach and commercialization.
 
-\section{Simple Drone artistic rendering}
+
 \begin{figure}[htbp]
 \centering
    \includegraphics[scale=0.8]{./images/simplePicture.png}
-    \caption{}
+    \caption{Simple Drone artistic rendering}
 \hspace{.3in}
 \end{figure}
 

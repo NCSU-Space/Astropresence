@@ -123,12 +123,12 @@ fittedBox(batteryDimensions, batteryBoxDimensions, fingerWidth, wallThickness);
 
 
 //Motor board box
-
+/*
 motorBoard2DDimensions = [69,102];
 motorBoardBoxDimensions = [90,110,30];
 
 rotate(90, [0,0,1])
 fittedBox(motorBoard2DDimensions, motorBoardBoxDimensions, fingerWidth, wallThickness);
-
+*/
 
 

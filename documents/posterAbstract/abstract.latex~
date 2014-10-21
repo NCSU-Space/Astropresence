@@ -1,0 +1,26 @@
+\documentclass{article}
+\usepackage[pdftex]{graphicx}
+\usepackage{titling}
+\usepackage{enumerate}
+
+\begin{document}
+
+\title{An ARM based Telepresence Platform for Astronaut Assistance and Space Tourism}
+
+\maketitle
+
+	The poster will describe a simple design to create an inexpensive ARM based free-flying telepresence platform for the International Space Station.  This platform could enable more than 6 potential missions:
+
+
+\begin{enumerate}[I]%for capital roman numbers.
+\item Telepresence/remote assistance for astronauts via ground control (Telepresence version of the Personal Satellite Assistant).
+\item Educational tours aboard the ISS.  Thousands of classrooms being able to actually interact with the station and the work being done there, without tying up valuable Astronaut time but carefully supervised by ground control. 
+\item Commercial opportunity:  Allow anyone to fly around the ISS (with certain restrictions) for 10 minutes at a cost of \$50 to \$100 dollars.  Even such a relatively low price point would pay for NASA employees to supervise all telepresence operations and support the further development of free flying drones for station operations.
+\item Telepresence cargo/parcel transport aboard the ISS.
+\item A modular platform for the development of inexpensive and upgradeable free flying zero gravity robots (open source platform).
+\item Documenting experiments and providing hands free recording for Astronauts.
+\end{enumerate}
+
+	The poster presentation will include a live demo of a telepresence drone prototype in a neutral buoyancy tank.  Participants will be able to pilot the drone via interaction with a laptop next to the tank.  The poster will provide information on both the technology that the drone uses, potential possible uses and current barriers preventing it from being deployed for its intended purpose.
+
+\end{document}
