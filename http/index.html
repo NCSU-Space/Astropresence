@@ -146,11 +146,12 @@ var gamepadHandler = function() {
   var gamepads = navigator.getGamepads();
   
   if(gamepads[0]) {
-    for(var i = 0, endi = 6; i < endi; ++i) {
-      rover.gamepad[i + 1] = Math.floor(gamepads[0].axes[i]*255);
-      
-      rover.pushIfChanged();
-    }
+    rover.gamepad[1] = Math.floor(gamepads[0].axes[0]*255);
+    rover.gamepad[2] = Math.floor(gamepads[0].axes[1]*255);
+    rover.gamepad[3] = Math.floor(gamepads[0].axes[3]*255);
+    rover.gamepad[4] = Math.floor(gamepads[0].axes[4]*255);
+    
+    rover.pushIfChanged();
   }
 }
 setInterval(gamepadHandler, 100);
