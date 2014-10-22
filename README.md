@@ -58,10 +58,11 @@ npm install
 sudo apt-get install ffmpeg # I forget if ffmpeg required any other setup
 ~~~
 
-Rover.js doesn't actually work right now, but if it did you would need to give it the server's ip and port when starting it:
+Rover.js need a pipe for sending data to the microcontroller, as well as the server's ip and port:
 
 ~~~
-nodejs rover.js [Your server's IP]:[Your server's port]
+mkfifo [your pipe's name]
+nodejs rover.js -i [Your server's IP] -p [Your server's port] -e [your pipe]
 ~~~
 
 Finally, start ffmpeg to send video from the bot:
