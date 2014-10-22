@@ -1,24 +1,80 @@
 process.title = 'tele_server';
 
-var http = require('http');
-var repl = require('repl');
+var http    = require('http');
+var repl    = require('repl');
+var fs      = require('fs');
 var express = require('express');
-var ws = require('ws');
+var ws      = require('ws');
+var stdio   = require('stdio');
+var iz      = require('iz');
+
+/////////////////
+// Get options //
+/////////////////
+
+var optionsAllowed = {
+  'ip'    : {key: 'i', args: 1, description: 'IP address for both HTTP and WS servers. Defaults to OpenShift if available, or if not then 0.0.0.0'},
+  'port'  : {key: 'p', args: 1, description: 'TCP port for both HTTP and WS servers. Defaults to OpenShift if available, or if not then 8080'},
+  'config': {key: 'c', args: 1, description: 'Load settings from configurations file. Defaults to ./config.json'},
+  'nofile': {          args: 0, description: 'Run without a config file. "ip" and "port" options must be specified'}
+};
+
+var optionsCLI = stdio.getopt(optionsAllowed);
+
+var optionsFile = {};
+
+if(!optionsCLI.nofile) {
+  try {
+    var optionsFile = JSON.parse(fs.readFileSync(optionsCLI.config || 'config.json'));
+  }
+  catch(error) {
+    console.error('Warning: Unable to read config file "' + (optionsCLI.config || 'config.json') + '". (' + error + ')');
+  }
+}
+
+// Condense options sources into one options object, applying priority
+var options = {};
+
+for(var i in optionsAllowed) {
+  options[i] = optionsCLI[i] || optionsFile[i];
+}
+
+if(!iz(options.ip).required().ip().valid) {
+  if(iz(process.env[options.ip]).required().ip().valid) {
+    options.ip = process.env[options.ip];
+  }
+  else {
+    console.error('Error: IP must be a valid IP address or local url. Run with -i 0.0.0.0 to use all available IPs');
+    process.exit(1);
+  }
+}
+
+if(!iz(options.port).required().int().between(1, 65535).valid) {
+  if(iz(process.env[options.port]).required().int().between(1, 65535).valid) {
+    options.port = process.env[options.port];
+  }
+  else {
+    console.error('Error: TCP port must be an integer between 1 and 65535. Run with -p 8080 to listen on port 8080');
+    process.exit(1);
+  }
+}
+
+if(iz(options.port).int().between(1, 1024).valid) {
+  console.warn('Warning: TCP ports between 1 and 1024 may require root permission');
+}
 
 /////////////////
 // HTTP server //
 /////////////////
 
-var PORT = process.env.OPENSHIFT_NODEJS_PORT || 8080;
-var IP = process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
 var app = express();
 var httpServer = http.createServer(app);
-httpServer.listen(PORT, IP);
+httpServer.listen(options.port, options.ip);
 
 // Simple static page server
-app.use('/http', express.static('./http'));
+app.use('/', express.static('./http'));
 app.use(express.compress());
-console.log(new Date().toUTCString() + ': Static file server listening at http://' + IP + ':' + PORT + '/http');
+console.log(new Date().toUTCString() + ': Static file server listening at http://' + options.ip + ':' + options.port + '/');
 
 ///////////////////////////
 // Repeater for controls //
@@ -26,6 +82,7 @@ console.log(new Date().toUTCString() + ': Static file server listening at http:/
 
 // These link to rover side
 var controlSocketToThePI = new ws.Server({server: httpServer, path: '/controlDrone'});
+console.log(new Date().toUTCString() + ': WS control server listening for drone at http://' + options.ip + ':' + options.port + '/controlDrone');
 
 controlSocketToThePI.on('connection', function(connection) {
   console.log('Received connection from Pi');
@@ -37,9 +94,10 @@ controlSocketToThePI.on('connection', function(connection) {
 
 // And these link to client(s)
 var controlSocketServer = new ws.Server({server: httpServer, path: '/controlClient'});
+console.log(new Date().toUTCString() + ': WS control server listening for clients at http://' + options.ip + ':' + options.port + '/controlClient');
 
 controlSocketServer.on('connection', function(connection) {
-  console.log(new Date().toUTCString() + ': Received WebSocket at :' + PORT + '/controlClient');
+  console.log(new Date().toUTCString() + ': Received WebSocket at :' + options.port + '/controlClient');
   
   connection.on('message', function(message) {
     try {
@@ -51,7 +109,7 @@ controlSocketServer.on('connection', function(connection) {
   });
   
   connection.on('close', function() {
-    console.log(new Date().toUTCString() + ': Closed WebSocket at :' + PORT + '/controlClient');
+    console.log(new Date().toUTCString() + ': Closed WebSocket at :' + options.port + '/controlClient');
   });
 });
 
@@ -59,17 +117,16 @@ controlSocketServer.on('connection', function(connection) {
 // Video part from those iOS devs //
 ////////////////////////////////////
 
-var STREAM_PORT = 8082,
-    STREAM_SECRET = '/videoDrone', // CHANGE THIS!
-    WEBSOCKET_PORT = 8080,
-    STREAM_MAGIC_BYTES = 'jsmp'; // Must be 4 bytes
+var STREAM_MAGIC_BYTES = 'jsmp'; // Must be 4 bytes
 
 var clients = {};
-var width = 320,
-    height = 240;
+var width = 640,
+    height = 480;
 
 // Websocket Server
 var socketServer = new (ws.Server)({server: httpServer, path: '/videoClient'});
+console.log(new Date().toUTCString() + ': WS video server listening at http://' + options.ip + ':' + options.port + '/videoClient');
+
 var _uniqueClientId = 1;
 
 var socketError = function() {};
@@ -98,8 +155,8 @@ socketServer.on('connection', function(socket) {
 // HTTP Server to accept incomming MPEG Stream
 function receiveMPEG(request, response) {
   var params = request.url.substr(1).split('/');
-  width = (params[0] || 160)|0;
-  height = (params[1] || 120)|0;
+  width = (params[0] || 640)|0;
+  height = (params[1] || 480)|0;
   
   console.log('Stream Connected: ' + request.socket.remoteAddress + ':' + request.socket.remotePort + ' size: ' + width + 'x' + height);
   request.on('data', function(data) {
@@ -109,18 +166,28 @@ function receiveMPEG(request, response) {
   });
 }
 
-app.use(STREAM_SECRET, receiveMPEG);
+app.use('/videoDrone', receiveMPEG);
 
-console.log('Listening for MPEG Stream on http://' + IP + ':' + PORT + '/<secret>/<width>/<height>');
+console.log(new Date().toUTCString() + ': Listening for MPEG Stream on http://' + options.ip + ':' + options.port + '/videoDrone/<width>/<height>');
 
 /////////
 // CLI //
 /////////
 
-
-
-var cli = repl.start({});
-cli.context.app = app;
-cli.context.httpServer = httpServer;
-cli.context.controlSocketToThePI = controlSocketToThePI;
-cli.context.controlSocketServer = controlSocketServer;
+if(repl != null) { // REPL may not be available on some cloud hosts
+  var cli = repl.start({});
+  cli.context.http           = http;
+  cli.context.repl           = repl;
+  cli.context.fs             = fs;
+  cli.context.express        = express;
+  cli.context.ws             = ws;
+  cli.context.stdio          = stdio;
+  cli.context.iz             = iz;
+  cli.context.optionsCLI     = optionsCLI;
+  cli.context.optionsFile    = optionsFile;
+  cli.context.options        = options;
+  cli.context.app            = app;
+  cli.context.httpServer     = httpServer;
+  cli.context.controlSocketToThePI = controlSocketToThePI;
+  cli.context.controlSocketServer = controlSocketServer;
+}
