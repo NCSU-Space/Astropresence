@@ -58,7 +58,7 @@ controlSocket.on('message', function(message) {
     case 'motors':
       var motors = mObject.motors;
       for(var i = 1, endi = 9; i < endi; ++i) {
-        stream.write(new Buffer([i, motors[i] > 0 ? 1 : 2, Math.floor(Math.abs(motors[i]), 255)]));
+        stream.write(new Buffer([mapping[i], motors[i] > 0 ? 1 : 2, Math.floor(Math.abs(motors[i]), 255)]));
       }
       break;
   }
