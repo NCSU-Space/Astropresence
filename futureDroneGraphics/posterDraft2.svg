@@ -29,8 +29,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.25"
-     inkscape:cx="1644.0283"
-     inkscape:cy="1752.655"
+     inkscape:cx="1586.1454"
+     inkscape:cy="1033.3545"
      inkscape:document-units="in"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -48,7 +48,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -214,7 +214,7 @@
        style="opacity:0.99999994;fill:#ffffff;fill-opacity:0.85470084;stroke:none"
        id="rect2984-0-39"
        width="810"
-       height="720"
+       height="507.46387"
        x="1215"
        y="-342.64029" />
     <flowRoot
@@ -428,9 +428,12 @@
            x="182.83762"
            y="875.37994"
            style="font-size:16px" /></flowRegion><flowPara
-         id="flowPara3270-4-2">Stuff about web browser interface</flowPara><flowPara
-         id="flowPara3929" /><flowPara
-         id="flowPara3931">The libusb C++  library and named pipes are used to make a software interface to communicate commands to the motive system for the drone.  Our custom firmware on the Teensy 3.0 then validates the commands and translates then into pulse width modulation patterns to drive the H-Bridges at the correct speed.</flowPara></flowRoot>    <flowRoot
+         id="flowPara4034">An instance of FFmpeg on the drone grabs video frames from the connected webcam and forwards them to a Node.js relay server.  The server then waits for incoming browser connections and transmits the images to a webapp.  Javascript in the webapp allows the user to commands to the server.  The server then forwards the commands to a script on the drone which writes them to a named pipe that the C++ motor driving program is listening to. The relay server may be either run on the drone's computer, or located elsewhere for easy accessibility or monitoring.</flowPara><flowPara
+         id="flowPara3174"></flowPara><flowPara
+         id="flowPara3176">The motor driver program listens to the named pipe for commands and then forwards them to the motor board using the libusb C++  library.  The custom firmware on the Teensy 3.0 then validates the commands and translates then into pulse width modulation patterns to drive the H-Bridges at the correct speed.</flowPara><flowPara
+         id="flowPara3243" /><flowPara
+         id="flowPara3245">Architecture Diagram:</flowPara><flowPara
+         id="flowPara4036" /></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot3049-4-9-4-2"
        style="font-size:16px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
@@ -490,5 +493,48 @@
            y="424"
            style="fill:#ffffff;fill-opacity:1" /></flowRegion><flowPara
          id="flowPara4198"
-         style="font-size:72px;fill:#ffffff;fill-opacity:1">Nathan Yinger</flowPara></flowRoot>  </g>
+         style="font-size:72px;fill:#ffffff;fill-opacity:1">Nathan Yinger</flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3153"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="translate(1374.6155,-4130.3106)"><flowRegion
+         id="flowRegion3155"><rect
+           id="rect3157"
+           width="386.08026"
+           height="42.426556"
+           x="469.51889"
+           y="3697.7461"
+           style="font-size:12px;fill:#ffffff" /></flowRegion><flowPara
+         id="flowPara3160">Source Image:</flowPara><flowPara
+         id="flowPara3162">http://forum.nasaspaceflight.com/index.php?topic=24062.0</flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3176"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="translate(166.17009,-3051.9727)"><flowRegion
+         id="flowRegion3178"><rect
+           id="rect3180"
+           width="578.41321"
+           height="218.49605"
+           x="1561.2917"
+           y="1330.3525"
+           style="font-size:12px;fill:#ffffff" /></flowRegion><flowPara
+         id="flowPara3182">Source Image:</flowPara><flowPara
+         id="flowPara3184">http://upload.wikimedia.org/wikipedia/commons/3/34/Unity_module_interior.jpg</flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3186"
+       style="fill:black;stroke:none;stroke-opacity:1;stroke-width:1px;stroke-linejoin:miter;stroke-linecap:butt;fill-opacity:1;font-family:Sans;font-style:normal;font-weight:normal;font-size:40px;line-height:125%;letter-spacing:0px;word-spacing:0px"><flowRegion
+         id="flowRegion3188"><rect
+           id="rect3190"
+           width="191.62593"
+           height="99.702057"
+           x="1589.576"
+           y="1336.7164" /></flowRegion><flowPara
+         id="flowPara3192" /></flowRoot>    <image
+       y="0.022903495"
+       x="1230.7598"
+       id="image3240"
+       xlink:href="file:///home/hewhosurvives/c++/randomProjects/telepresenceDrone/futureDroneGraphics/diagram.png"
+       height="152.78119"
+       width="782.30365" />
+  </g>
 </svg>
