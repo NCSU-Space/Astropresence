@@ -62,7 +62,7 @@ Rover.js need a pipe for sending data to the microcontroller, as well as the ser
 
 ~~~
 mkfifo [your pipe's name]
-nodejs rover.js -i [Your server's IP] -p [Your server's port] -e [your pipe]
+nodejs rover.js -i [Your server's IP] -p [Your server's port] -e [your pipe] -s
 ~~~
 
 Finally, start ffmpeg to send video from the bot:
