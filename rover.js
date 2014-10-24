@@ -16,6 +16,17 @@ var options = stdio.getopt(optionsAllowed);
 
 var log = options.silent ? function(){} : console.log;
 
+var mapping = {
+  1: 1,
+  2: 4,
+  3: 6,
+  4: 8,
+  5: 3,
+  6: 7,
+  7: 2,
+  8: 5,
+}
+
 // Doesn't seem to actually catch errors...maybe there is an option to place an event handler with the contructor?
 try {
   controlSocket = new ws('ws://' + options.ip + ':' + options.port + '/controlDrone');
