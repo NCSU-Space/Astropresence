@@ -163,15 +163,25 @@ var gamepadHandler = function() {
     var axes = navigator.getGamepads()[0].axes;
     
     var forward = axes[1]; // Left stick vertical
+    var lateral = axes[0]; // Left stick lateral
+    var vertical = axes [7]; // D-pad vertical;
     var yaw = axes[3]; // Right stick lateral
     var pitch = axes[4]; // Right stick vertical
+    var roll = (axes[2] - axes[5])/2; // Analog triggers
     
+    // Forward, yaw, and pitch use the same motors
     var scale = Math.max(1, Math.abs(forward) + Math.abs(yaw) + Math.abs(pitch));
-    
     rover.gamepad[1] = Math.floor((forward - yaw + pitch)/scale*255);
     rover.gamepad[2] = Math.floor((forward - yaw - pitch)/scale*255);
     rover.gamepad[3] = Math.floor((forward + yaw - pitch)/scale*255);
     rover.gamepad[4] = Math.floor((forward + yaw + pitch)/scale*255);
+    
+    // Vertical and lateral motors are both used by roll
+    scale = Math.max(1, Math.abs(vertical + roll), Math.abs(lateral + roll));
+    rover.gamepad[5] = Math.floor((vertical + roll)/scale*255);
+    rover.gamepad[6] = Math.floor((vertical - roll)/scale*255);
+    rover.gamepad[7] = Math.floor((lateral  + roll)/scale*255);
+    rover.gamepad[8] = Math.floor((lateral  - roll)/scale*255);
     
     rover.pushIfChanged();
   }
